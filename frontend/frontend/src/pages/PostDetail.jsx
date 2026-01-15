@@ -87,48 +87,180 @@ export default function PostDetail() {
     }
   };
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <p style={{ textAlign: "center" }}>Loading...</p>;
+
+  const userId = token ? JSON.parse(atob(token.split(".")[1])).id : null;
 
   return (
-    <div className="post-detail">
-      <h2>{post.title}</h2>
-      <p>{post.content}</p>
-      <p>
-        By {post.author.name} on {new Date(post.createdAt).toLocaleString()}
-      </p>
+    <div style={styles.container}>
+      <div style={styles.card}>
+        <h2 style={styles.title}>{post.title}</h2>
+        <p style={styles.content}>{post.content}</p>
+        <p style={styles.meta}>
+          By <strong>{post.author.name}</strong> on{" "}
+          {new Date(post.createdAt).toLocaleString()}
+        </p>
 
-      {token && post.author._id === JSON.parse(atob(token.split(".")[1])).id && (
-        <div>
-          <button onClick={() => navigate(`/edit/${post._id}`)}>Edit Post</button>
-          <button onClick={handleDeletePost}>Delete Post</button>
-        </div>
-      )}
+        {token && post.author._id === userId && (
+          <div style={styles.actionButtons}>
+            <button style={styles.editBtn} onClick={() => navigate(`/edit/${post._id}`)}>
+              Edit Post
+            </button>
+            <button style={styles.deleteBtn} onClick={handleDeletePost}>
+              Delete Post
+            </button>
+          </div>
+        )}
+      </div>
 
-      <hr />
+      <div style={styles.commentsSection}>
+        <h3>Comments</h3>
+        {comments.map((c) => (
+          <div key={c._id} style={styles.commentCard}>
+            <p style={styles.commentContent}>{c.content}</p>
+            <p style={styles.commentMeta}>
+              By <strong>{c.user.name}</strong> on{" "}
+              {new Date(c.createdAt).toLocaleString()}
+            </p>
+            {token && c.user._id === userId && (
+              <button style={styles.deleteCommentBtn} onClick={() => handleDeleteComment(c._id)}>
+                Delete
+              </button>
+            )}
+          </div>
+        ))}
 
-      <h3>Comments</h3>
-      {comments.map((c) => (
-        <div key={c._id} style={{ borderBottom: "1px solid #ccc", marginBottom: "5px" }}>
-          <p>{c.content}</p>
-          <p>
-            By {c.user.name} on {new Date(c.createdAt).toLocaleString()}
-          </p>
-          {token && c.user._id === JSON.parse(atob(token.split(".")[1])).id && (
-            <button onClick={() => handleDeleteComment(c._id)}>Delete</button>
-          )}
-        </div>
-      ))}
-
-      {token && (
-        <form onSubmit={handleAddComment}>
-          <textarea
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-            placeholder="Write a comment..."
-          />
-          <button type="submit">Add Comment</button>
-        </form>
-      )}
+        {token && (
+          <form onSubmit={handleAddComment} style={styles.commentForm}>
+            <textarea
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              placeholder="Write a comment..."
+              style={styles.textarea}
+            />
+            <button type="submit" style={styles.submitBtn}>
+              Add Comment
+            </button>
+          </form>
+        )}
+      </div>
     </div>
   );
 }
+
+const styles = {
+  container: {
+    padding: "1rem",
+    maxWidth: "800px",
+    margin: "0 auto",
+    boxSizing: "border-box",
+  },
+  card: {
+    background: "#fff",
+    padding: "1.5rem",
+    borderRadius: "8px",
+    boxShadow: "0 4px 15px rgba(0,0,0,0.1)",
+    marginBottom: "2rem",
+  },
+  title: {
+    marginBottom: "0.5rem",
+    color: "#333",
+  },
+  content: {
+    marginBottom: "0.5rem",
+    lineHeight: "1.6",
+  },
+  meta: {
+    fontSize: "0.85rem",
+    color: "#777",
+  },
+  actionButtons: {
+    display: "flex",
+    gap: "0.5rem",
+    marginTop: "1rem",
+  },
+  editBtn: {
+    background: "#007bff",
+    color: "white",
+    border: "none",
+    padding: "0.5rem 1rem",
+    borderRadius: "5px",
+    cursor: "pointer",
+  },
+  deleteBtn: {
+    background: "#dc3545",
+    color: "white",
+    border: "none",
+    padding: "0.5rem 1rem",
+    borderRadius: "5px",
+    cursor: "pointer",
+  },
+  commentsSection: {
+    marginTop: "2rem",
+  },
+  commentCard: {
+    background: "#f8f9fa",
+    padding: "1rem",
+    borderRadius: "5px",
+    marginBottom: "1rem",
+    position: "relative",
+  },
+  commentContent: {
+    marginBottom: "0.5rem",
+  },
+  commentMeta: {
+    fontSize: "0.75rem",
+    color: "#555",
+  },
+  deleteCommentBtn: {
+    position: "absolute",
+    top: "10px",
+    right: "10px",
+    background: "#dc3545",
+    color: "white",
+    border: "none",
+    padding: "0.3rem 0.6rem",
+    borderRadius: "5px",
+    cursor: "pointer",
+  },
+  commentForm: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "0.5rem",
+  },
+  textarea: {
+    padding: "0.7rem",
+    borderRadius: "5px",
+    border: "1px solid #ccc",
+    resize: "vertical",
+    minHeight: "80px",
+    width: "100%",
+    boxSizing: "border-box",
+  },
+  submitBtn: {
+    padding: "0.7rem",
+    borderRadius: "5px",
+    border: "none",
+    background: "#28a745",
+    color: "white",
+    fontWeight: "bold",
+    cursor: "pointer",
+    width: "100%",
+  },
+
+  // Responsif
+  "@media (max-width: 480px)": {
+    card: {
+      padding: "1rem",
+    },
+    actionButtons: {
+      flexDirection: "column",
+    },
+    editBtn: {
+      width: "100%",
+    },
+    deleteBtn: {
+      width: "100%",
+    },
+  },
+};

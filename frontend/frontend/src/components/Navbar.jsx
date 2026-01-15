@@ -13,25 +13,27 @@ function Navbar() {
 
   return (
     <nav style={styles.nav}>
-      <h3>MyBlog</h3>
+      <div style={styles.container}>
+        <h3 style={styles.logo}>MyBlog</h3>
 
-      <div style={styles.links}>
-        <Link to="/">Home</Link>
+        <div style={styles.links}>
+          <Link to="/" style={styles.link}>Home</Link>
 
-        {token ? (
-          <>
-            <Link to="/create">Create Post</Link>
-            <Link to="/profile">Profile</Link>
-            <button onClick={handleLogout} style={styles.button}>
-              Logout
-            </button>
-          </>
-        ) : (
-          <>
-            <Link to="/login">Login</Link>
-            <Link to="/register">Register</Link>
-          </>
-        )}
+          {token ? (
+            <>
+              <Link to="/create" style={styles.link}>Create Post</Link>
+              <Link to="/profile" style={styles.link}>Profile</Link>
+              <button onClick={handleLogout} style={styles.button}>
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <Link to="/login" style={styles.link}>Login</Link>
+              <Link to="/register" style={styles.link}>Register</Link>
+            </>
+          )}
+        </div>
       </div>
     </nav>
   );
@@ -39,16 +41,36 @@ function Navbar() {
 
 const styles = {
   nav: {
+    position: "fixed",      // tetap di atas
+    top: 0,
+    left: 0,
+    width: "100%",
+    background: "#333",
+    color: "white",
+    zIndex: 1000,
+    boxShadow: "0 2px 5px rgba(0,0,0,0.2)",
+  },
+  container: {
+    maxWidth: "800px",
+    margin: "0 auto",       // tengah secara horizontal
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
     padding: "1rem",
-    borderBottom: "1px solid #ddd",
+  },
+  logo: {
+    margin: 0,
+    fontSize: "1.5rem",
+    fontWeight: "bold",
   },
   links: {
     display: "flex",
     gap: "1rem",
     alignItems: "center",
+  },
+  link: {
+    color: "white",
+    textDecoration: "none",
   },
   button: {
     background: "red",
