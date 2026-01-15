@@ -2,6 +2,7 @@ import { useState, useEffect, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../api/axios";
 import { AuthContext } from "../context/AuthContext";
+import CommentSection from "../components/CommentSection";
 
 function PostDetail() {
   const { id } = useParams();
@@ -43,7 +44,7 @@ function PostDetail() {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setEditMode(false);
-      // reload
+      // reload post
       const res = await api.get(`/posts/${id}`);
       setPost(res.data);
     } catch (err) {
@@ -67,6 +68,8 @@ function PostDetail() {
 
   if (!post) return <p>Loading...</p>;
 
+  const isAuthor = token && post.authorId === getUserIdFromToken(token);
+
   return (
     <div style={styles.container}>
       {error && <p style={styles.error}>{error}</p>}
@@ -77,11 +80,13 @@ function PostDetail() {
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
+            placeholder="Title"
           />
           <textarea
             rows="6"
             value={content}
             onChange={(e) => setContent(e.target.value)}
+            placeholder="Content"
           />
           <button onClick={handleEdit}>Save</button>
           <button onClick={() => setEditMode(false)}>Cancel</button>
@@ -90,12 +95,14 @@ function PostDetail() {
         <>
           <h2>{post.title}</h2>
           <p>{post.content}</p>
-          {token && post.authorId === getUserIdFromToken(token) && (
+          {isAuthor && (
             <div>
               <button onClick={() => setEditMode(true)}>Edit</button>
               <button onClick={handleDelete}>Delete</button>
             </div>
           )}
+          {/* Comments Section */}
+          <CommentSection postId={id} />
         </>
       )}
     </div>

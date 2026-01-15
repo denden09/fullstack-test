@@ -4,79 +4,80 @@ import api from "../api/axios";
 import { AuthContext } from "../context/AuthContext";
 
 function CreatePost() {
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
-  const [error, setError] = useState("");
-
   const { token } = useContext(AuthContext);
   const navigate = useNavigate();
+
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+  const [category, setCategory] = useState("");
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // 🔒 validation
-    if (!title || !content) {
-      setError("Title and content are required");
-      return;
+    if (!title.trim() || !content.trim()) {
+      return setError("Title and content cannot be empty");
     }
 
     try {
-      await api.post(
+      const res = await api.post(
         "/posts",
-        { title, content },
+        { title, content, category },
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
 
-      navigate("/");
+      // redirect to detail page of new post
+      navigate(`/posts/${res.data._id}`);
     } catch (err) {
       setError(err.response?.data?.message || "Failed to create post");
     }
   };
 
+  if (!token) {
+    return <p>Please login to create a post.</p>;
+  }
+
   return (
-    <div style={styles.container}>
+    <div style={{ padding: "1rem" }}>
       <h2>Create New Post</h2>
+      {error && <p style={{ color: "red" }}>{error}</p>}
+      <form onSubmit={handleSubmit}>
+        <div>
+          <label>Title:</label>
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Enter title"
+          />
+        </div>
 
-      {error && <p style={styles.error}>{error}</p>}
+        <div>
+          <label>Content:</label>
+          <textarea
+            rows="6"
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            placeholder="Enter content"
+          />
+        </div>
 
-      <form onSubmit={handleSubmit} style={styles.form}>
-        <input
-          type="text"
-          placeholder="Post title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-        />
+        <div>
+          <label>Category (optional):</label>
+          <input
+            type="text"
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            placeholder="Enter category"
+          />
+        </div>
 
-        <textarea
-          placeholder="Post content"
-          rows="6"
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-        />
-
-        <button type="submit">Create</button>
+        <button type="submit">Create Post</button>
       </form>
     </div>
   );
 }
-
-const styles = {
-  container: {
-    maxWidth: "600px",
-    margin: "2rem auto",
-  },
-  form: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "1rem",
-  },
-  error: {
-    color: "red",
-  },
-};
 
 export default CreatePost;
