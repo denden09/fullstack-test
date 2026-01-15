@@ -16,12 +16,12 @@ function App() {
         <Navbar />
 
         <Routes>
-          <Route path="/" element={<Posts />} />
           <Route path="/posts/:id" element={<PostDetail />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
           <Route path="/create" element={<CreatePost />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/" element={<Posts />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
