@@ -8,43 +8,49 @@ import Posts from "./pages/Posts";
 import PostDetail from "./pages/PostDetail";
 import CreatePost from "./pages/CreatePost";
 import Profile from "./pages/Profile";
-import EditPost from "./pages/EditPost"; // <--- import EditPost
+import EditPost from "./pages/EditPost";
 
 function App() {
   return (
     <AuthProvider>
-      <div style={styles.appContainer}>
-        <BrowserRouter>
+      <BrowserRouter>
+        <div style={styles.appContainer}>
           <Navbar />
 
-          <div style={styles.content}>
+          {/* GLOBAL PAGE WRAPPER */}
+          <main style={styles.pageWrapper}>
             <Routes>
+              <Route path="/" element={<Posts />} />
               <Route path="/posts/:id" element={<PostDetail />} />
-              <Route path="/edit/:id" element={<EditPost />} />   {/* <--- route EditPost */}
+              <Route path="/edit/:id" element={<EditPost />} />
               <Route path="/create" element={<CreatePost />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
-              <Route path="/" element={<Posts />} />
             </Routes>
-          </div>
-        </BrowserRouter>
-      </div>
+          </main>
+        </div>
+      </BrowserRouter>
     </AuthProvider>
   );
 }
 
 const styles = {
   appContainer: {
-    fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-    background: "#f9f9f9",
+    fontFamily: "'Poppins', sans-serif", // 👈 bisa ganti font
+    backgroundColor: "#f9f9f9",
     minHeight: "100vh",
   },
-  content: {
-    maxWidth: "1000px",
-    margin: "2rem auto",
-    padding: "0 1rem",
+
+  pageWrapper: {
+    maxWidth: "1100px",
+    margin: "0 auto",
+    padding: "100px 1rem 2rem", // 👈 aman dari navbar fixed
     boxSizing: "border-box",
+
+    display: "flex",
+    flexDirection: "column",
+    // ❌ alignItems: "center" (DIHAPUS)
   },
 };
 
