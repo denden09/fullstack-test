@@ -8,6 +8,7 @@ import Posts from "./pages/Posts";
 import PostDetail from "./pages/PostDetail";
 import CreatePost from "./pages/CreatePost";
 import Profile from "./pages/Profile";
+import EditPost from "./pages/EditPost"; // <--- import EditPost
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
           <div style={styles.content}>
             <Routes>
               <Route path="/posts/:id" element={<PostDetail />} />
+              <Route path="/edit/:id" element={<EditPost />} />   {/* <--- route EditPost */}
               <Route path="/create" element={<CreatePost />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/login" element={<Login />} />

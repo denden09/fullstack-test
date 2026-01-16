@@ -54,8 +54,10 @@ export default function Profile() {
     }
   };
 
-  if (!token) return <p style={styles.center}>Please login to see your profile.</p>;
-  if (loading) return <p style={styles.center}>Loading your posts...</p>;
+  if (!token)
+    return <p style={styles.center}>Please login to see your profile.</p>;
+  if (loading)
+    return <p style={styles.center}>Loading your posts...</p>;
 
   return (
     <div style={styles.container}>
@@ -75,7 +77,10 @@ export default function Profile() {
                 <Link to={`/posts/${post._id}`} style={styles.button}>
                   View
                 </Link>
-                <Link to={`/posts/${post._id}/edit`} style={{ ...styles.button, background: "#ffc107" }}>
+                <Link
+                  to={`/edit/${post._id}`}
+                  style={{ ...styles.button, background: "#ffc107", color: "#333" }}
+                >
                   Edit
                 </Link>
                 <button
@@ -117,9 +122,9 @@ const styles = {
   },
   card: {
     background: "#fff",
-    padding: "1rem",
+    padding: "1.5rem",
     borderRadius: "8px",
-    boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+    boxShadow: "0 4px 15px rgba(0,0,0,0.1)",
     display: "flex",
     flexDirection: "column",
     justifyContent: "space-between",
@@ -141,11 +146,12 @@ const styles = {
   actions: {
     display: "flex",
     gap: "0.5rem",
+    flexWrap: "wrap",
   },
   button: {
     flex: 1,
     textAlign: "center",
-    padding: "0.4rem 0.6rem",
+    padding: "0.5rem 0.6rem",
     borderRadius: "5px",
     color: "#fff",
     background: "#28a745",
@@ -153,5 +159,14 @@ const styles = {
     border: "none",
     cursor: "pointer",
     transition: "background 0.3s",
+  },
+  // Responsif
+  "@media (max-width: 480px)": {
+    actions: {
+      flexDirection: "column",
+    },
+    button: {
+      width: "100%",
+    },
   },
 };
