@@ -5,15 +5,51 @@ import { Link } from "react-router-dom";
 export default function Posts() {
   const [posts, setPosts] = useState([]);
   const [hovered, setHovered] = useState(null);
+  const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(false);
 
+  const fetchPosts = async () => {
+    try {
+      setLoading(true);
+      const res = await api.get("/posts", {
+        params: { search },
+      });
+      setPosts(res.data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch posts when search changes (debounce)
   useEffect(() => {
-    api.get("/posts").then((res) => setPosts(res.data));
-  }, []);
+    const delay = setTimeout(() => {
+      fetchPosts();
+    }, 400);
+
+    return () => clearTimeout(delay);
+  }, [search]);
 
   return (
     <div style={styles.page}>
       <div style={styles.container}>
         <h1 style={styles.heading}>Latest Posts</h1>
+
+        {/* 🔍 SEARCH */}
+        <input
+          type="text"
+          placeholder="Search posts by title or content..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          style={styles.search}
+        />
+
+        {loading && <p style={{ textAlign: "center" }}>Loading...</p>}
+
+        {!loading && posts.length === 0 && (
+          <p style={{ textAlign: "center" }}>No posts found</p>
+        )}
 
         <div style={styles.grid}>
           {posts.map((post) => (
@@ -61,10 +97,21 @@ const styles = {
   },
   heading: {
     textAlign: "center",
-    marginBottom: "3rem",
+    marginBottom: "2rem",
     fontSize: "2.4rem",
     fontWeight: "700",
     color: "#222",
+  },
+  search: {
+    width: "100%",
+    maxWidth: "500px",
+    display: "block",
+    margin: "0 auto 3rem",
+    padding: "0.8rem 1rem",
+    borderRadius: "999px",
+    border: "1px solid #ccc",
+    fontSize: "1rem",
+    outline: "none",
   },
   grid: {
     display: "grid",
