@@ -2,6 +2,8 @@ import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import api from "../api/axios";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 export default function CreatePost() {
   const { token } = useContext(AuthContext);
@@ -10,6 +12,7 @@ export default function CreatePost() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [category, setCategory] = useState("");
+  const [preview, setPreview] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -23,9 +26,8 @@ export default function CreatePost() {
         { title, content, category },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      navigate("/"); // Redirect ke home page
+      navigate("/");
     } catch (err) {
-      console.error(err);
       alert("Failed to create post");
     }
   };
@@ -34,38 +36,39 @@ export default function CreatePost() {
     <div style={styles.container}>
       <div style={styles.card}>
         <h2 style={styles.heading}>Create New Post</h2>
+
         <form onSubmit={handleSubmit} style={styles.form}>
-          <div style={styles.field}>
-            <label style={styles.label}>Title:</label>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              required
-              style={styles.input}
-            />
-          </div>
+          <input
+            placeholder="Post title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            style={styles.input}
+          />
 
-          <div style={styles.field}>
-            <label style={styles.label}>Content:</label>
-            <textarea
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              required
-              rows={6}
-              style={{ ...styles.input, resize: "vertical" }}
-            />
-          </div>
+          <textarea
+            placeholder="Write in Markdown (## Heading, **bold**, - list)"
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            rows={8}
+            style={{ ...styles.input, resize: "vertical" }}
+          />
 
-          <div style={styles.field}>
-            <label style={styles.label}>Category (optional):</label>
+          <label style={styles.previewToggle}>
             <input
-              type="text"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              style={styles.input}
+              type="checkbox"
+              checked={preview}
+              onChange={() => setPreview(!preview)}
             />
-          </div>
+            Live Markdown Preview
+          </label>
+
+          {preview && (
+            <div style={styles.preview}>
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                {content}
+              </ReactMarkdown>
+            </div>
+          )}
 
           <button type="submit" style={styles.button}>
             Create Post
@@ -80,53 +83,37 @@ const styles = {
   container: {
     display: "flex",
     justifyContent: "center",
-    alignItems: "center",
-    minHeight: "calc(100vh - 70px)", // jika navbar tinggi 70px
-    background: "#f5f5f5",
-    padding: "1rem",
+    padding: "2rem",
   },
   card: {
-    background: "white",
-    padding: "2rem",
-    borderRadius: "8px",
-    boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
     width: "100%",
-    maxWidth: "500px",
+    maxWidth: "600px",
+    background: "#fff",
+    padding: "2rem",
+    borderRadius: "10px",
   },
-  heading: {
-    marginBottom: "1.5rem",
-    textAlign: "center",
-    color: "#333",
-  },
-  form: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "1rem",
-  },
-  field: {
-    display: "flex",
-    flexDirection: "column",
-  },
-  label: {
-    marginBottom: "0.5rem",
-    fontWeight: "bold",
-    color: "#555",
-  },
+  heading: { textAlign: "center" },
+  form: { display: "flex", flexDirection: "column", gap: "1rem" },
   input: {
-    padding: "0.6rem 0.8rem",
-    borderRadius: "5px",
+    padding: "0.7rem",
+    borderRadius: "6px",
     border: "1px solid #ccc",
-    fontSize: "1rem",
-    outline: "none",
   },
   button: {
-    padding: "0.7rem",
-    borderRadius: "5px",
-    border: "none",
     background: "#007bff",
-    color: "white",
-    fontWeight: "bold",
-    cursor: "pointer",
-    transition: "background 0.3s",
+    color: "#fff",
+    padding: "0.7rem",
+    border: "none",
+    borderRadius: "6px",
+  },
+  previewToggle: {
+    fontSize: "0.9rem",
+    color: "#555",
+  },
+  preview: {
+    border: "1px solid #ddd",
+    padding: "1rem",
+    borderRadius: "6px",
+    background: "#fafafa",
   },
 };

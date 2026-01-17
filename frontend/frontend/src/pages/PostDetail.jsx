@@ -2,6 +2,9 @@ import { useState, useEffect, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import api from "../api/axios";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+
 
 export default function PostDetail() {
   const { id } = useParams();
@@ -110,7 +113,12 @@ export default function PostDetail() {
       {/* POST CARD */}
       <div style={styles.card}>
         <h2>{post.title}</h2>
-        <p style={styles.content}>{post.content}</p>
+        <div style={styles.content}>
+  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+    {post.content}
+  </ReactMarkdown>
+</div>
+
         <p style={styles.meta}>
           By <strong>{post.author.name}</strong> ·{" "}
           {new Date(post.createdAt).toLocaleString()}
@@ -183,9 +191,10 @@ const styles = {
     boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
   },
   content: {
-    marginTop: "1rem",
-    lineHeight: 1.6,
-  },
+  marginTop: "1rem",
+  lineHeight: 1.8,
+  color: "#eee",
+},
   meta: {
     fontSize: "0.85rem",
     color: "#666",
