@@ -152,6 +152,14 @@ http://localhost:5000
 | POST   | `/posts`     | Create new post (auth required)  |
 | GET    | `/posts/:id` | Get post by ID                   |
 
+### Comment
+
+| Method | Endpoint     | Description                      |
+| ------ | ------------ | -------------------------------- |
+| Post   | `/posts`     | add comment                      |
+| Put    | `/comments/:id`    | edit comment               |
+| GET    | `/comments/:id` | Get post by ID                |
+| Delete | `/comments/:id` | Delete comment                |
 ---
 
 ## 🔐 Authorization
