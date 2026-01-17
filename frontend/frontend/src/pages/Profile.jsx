@@ -8,6 +8,7 @@ export default function Profile() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Ambil userId dari JWT token
   const getUserIdFromToken = (token) => {
     try {
       const payload = JSON.parse(atob(token.split(".")[1]));
@@ -17,6 +18,7 @@ export default function Profile() {
     }
   };
 
+  // Fetch posts user
   useEffect(() => {
     if (!token) return;
 
@@ -26,13 +28,15 @@ export default function Profile() {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        const userPosts = res.data.filter(
+        // Akses array posts dari backend
+        const userPosts = res.data.posts.filter(
           (post) => post.author._id === getUserIdFromToken(token)
         );
+
         setPosts(userPosts);
         setLoading(false);
       } catch (err) {
-        console.error(err);
+        console.error("Error fetching posts:", err.response || err);
         setLoading(false);
       }
     };
@@ -40,6 +44,7 @@ export default function Profile() {
     fetchUserPosts();
   }, [token]);
 
+  // Delete post
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this post?")) return;
 
@@ -49,15 +54,14 @@ export default function Profile() {
       });
       setPosts(posts.filter((post) => post._id !== id));
     } catch (err) {
-      console.error(err);
+      console.error("Error deleting post:", err.response || err);
       alert("Failed to delete post.");
     }
   };
 
   if (!token)
     return <p style={styles.center}>Please login to see your profile.</p>;
-  if (loading)
-    return <p style={styles.center}>Loading your posts...</p>;
+  if (loading) return <p style={styles.center}>Loading your posts...</p>;
 
   return (
     <div style={styles.container}>
@@ -160,7 +164,6 @@ const styles = {
     cursor: "pointer",
     transition: "background 0.3s",
   },
-  // Responsif
   "@media (max-width: 480px)": {
     actions: {
       flexDirection: "column",

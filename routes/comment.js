@@ -15,7 +15,7 @@ const router = express.Router();
 router.get("/post/:postId", async (req, res) => {
   try {
     const comments = await Comment.find({ post: req.params.postId })
-      .populate("author", "name email")
+      .populate("author", "name email avatar")
       .sort({ createdAt: 1 });
 
     res.json(comments);

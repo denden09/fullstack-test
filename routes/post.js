@@ -10,20 +10,55 @@ const router = express.Router();
  * =========================
  */
 
-// GET all posts (public)
+/**
+ * GET all posts + SEARCH + PAGINATION
+ * Example:
+ * GET /posts
+ * GET /posts?search=react
+ * GET /posts?page=1&limit=6
+ * GET /posts?search=react&page=2&limit=6
+ */
 router.get("/", async (req, res) => {
   try {
-    const posts = await Post.find()
-      .populate("author", "name email")
-      .sort({ createdAt: -1 });
+    const search = req.query.search || "";
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 6;
 
-    res.json(posts);
+    const skip = (page - 1) * limit;
+
+    let filter = {};
+
+    if (search.trim() !== "") {
+      filter = {
+        $or: [
+          { title: { $regex: search, $options: "i" } },
+          { content: { $regex: search, $options: "i" } },
+        ],
+      };
+    }
+
+    const totalPosts = await Post.countDocuments(filter);
+
+    const posts = await Post.find(filter)
+      .populate("author", "name email avatar")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    res.json({
+      posts,
+      currentPage: page,
+      totalPages: Math.ceil(totalPosts / limit),
+      totalPosts,
+    });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
-// GET single post by ID (public)
+/**
+ * GET single post by ID (public)
+ */
 router.get("/:id", async (req, res) => {
   try {
     const post = await Post.findById(req.params.id)
@@ -45,10 +80,11 @@ router.get("/:id", async (req, res) => {
  * =========================
  */
 
-// 🔐 all routes below require JWT
 router.use(authMiddleware);
 
-// CREATE post
+/**
+ * CREATE post
+ */
 router.post("/", async (req, res) => {
   try {
     const { title, content } = req.body;
@@ -62,7 +98,7 @@ router.post("/", async (req, res) => {
     const post = await Post.create({
       title,
       content,
-      author: req.user.id
+      author: req.user.id,
     });
 
     res.status(201).json(post);
@@ -71,11 +107,11 @@ router.post("/", async (req, res) => {
   }
 });
 
-// UPDATE post (author only)
+/**
+ * UPDATE post (author only)
+ */
 router.put("/:id", async (req, res) => {
   try {
-    const { title, content } = req.body;
-
     const post = await Post.findById(req.params.id);
 
     if (!post) {
@@ -86,8 +122,8 @@ router.put("/:id", async (req, res) => {
       return res.status(403).json({ message: "Unauthorized" });
     }
 
-    post.title = title || post.title;
-    post.content = content || post.content;
+    post.title = req.body.title || post.title;
+    post.content = req.body.content || post.content;
 
     await post.save();
     res.json(post);
@@ -96,7 +132,9 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-// DELETE post (author only)
+/**
+ * DELETE post (author only)
+ */
 router.delete("/:id", async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);

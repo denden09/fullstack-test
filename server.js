@@ -7,8 +7,13 @@ const authRoutes = require("./routes/auth");
 const authMiddleware = require("./middleware/authMiddleware");
 const postRoutes = require("./routes/post");
 const commentRoutes = require("./routes/comment");
+const userRoutes = require("./routes/user");
 
 const app = express(); // ✅ app HARUS dibuat dulu
+const path = require("path");
+
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use("/users", userRoutes);
 
 // middleware
 app.use(cors());

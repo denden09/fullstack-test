@@ -1,42 +1,55 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import api from "../api/axios";
 import { Link } from "react-router-dom";
 
-export default function Posts() {
+export default function Posts({ newPost }) { // optional prop: post baru dari PostForm
   const [posts, setPosts] = useState([]);
   const [hovered, setHovered] = useState(null);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const fetchPosts = async () => {
+  // fetch posts dari backend
+  const fetchPosts = useCallback(async () => {
     try {
       setLoading(true);
+
       const res = await api.get("/posts", {
         params: { search },
       });
-      setPosts(res.data);
+
+      // ambil array posts dari backend
+      const data = Array.isArray(res.data.posts) ? res.data.posts : [];
+      setPosts(data);
     } catch (err) {
-      console.error(err);
+      console.error("Fetch posts error:", err);
+      setPosts([]); // anti crash
     } finally {
       setLoading(false);
     }
-  };
+  }, [search]);
 
-  // Fetch posts when search changes (debounce)
+  // fetch awal & tiap search berubah
   useEffect(() => {
     const delay = setTimeout(() => {
       fetchPosts();
-    }, 400);
+    }, 400); // debounce search
 
     return () => clearTimeout(delay);
-  }, [search]);
+  }, [search, fetchPosts]);
+
+  // update otomatis saat ada post baru
+  useEffect(() => {
+    if (newPost) {
+      setPosts((prev) => [newPost, ...prev]);
+    }
+  }, [newPost]);
 
   return (
     <div style={styles.page}>
       <div style={styles.container}>
         <h1 style={styles.heading}>Latest Posts</h1>
 
-        {/* 🔍 SEARCH */}
+        {/* SEARCH */}
         <input
           type="text"
           placeholder="Search posts by title or content..."
@@ -52,34 +65,35 @@ export default function Posts() {
         )}
 
         <div style={styles.grid}>
-          {posts.map((post) => (
-            <div
-              key={post._id}
-              style={{
-                ...styles.card,
-                ...(hovered === post._id && styles.cardHover),
-              }}
-              onMouseEnter={() => setHovered(post._id)}
-              onMouseLeave={() => setHovered(null)}
-            >
-              <h3 style={styles.title}>{post.title}</h3>
+          {Array.isArray(posts) &&
+            posts.map((post) => (
+              <div
+                key={post._id}
+                style={{
+                  ...styles.card,
+                  ...(hovered === post._id && styles.cardHover),
+                }}
+                onMouseEnter={() => setHovered(post._id)}
+                onMouseLeave={() => setHovered(null)}
+              >
+                <h3 style={styles.title}>{post.title}</h3>
 
-              <p style={styles.content}>
-                {post.content.slice(0, 140)}...
-              </p>
+                <p style={styles.content}>
+                  {post.content?.slice(0, 140)}...
+                </p>
 
-              <div style={styles.footer}>
-                <span style={styles.meta}>
-                  {post.author.name} ·{" "}
-                  {new Date(post.createdAt).toLocaleDateString()}
-                </span>
+                <div style={styles.footer}>
+                  <span style={styles.meta}>
+                    {post.author?.name || "Unknown"} ·{" "}
+                    {new Date(post.createdAt).toLocaleDateString()}
+                  </span>
 
-                <Link to={`/posts/${post._id}`} style={styles.readMore}>
-                  Read →
-                </Link>
+                  <Link to={`/posts/${post._id}`} style={styles.readMore}>
+                    Read →
+                  </Link>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
         </div>
       </div>
     </div>
@@ -87,21 +101,9 @@ export default function Posts() {
 }
 
 const styles = {
-  page: {
-    width: "100%",
-  },
-  container: {
-    maxWidth: "1200px",
-    margin: "0 auto",
-    padding: "0 1.5rem",
-  },
-  heading: {
-    textAlign: "center",
-    marginBottom: "2rem",
-    fontSize: "2.4rem",
-    fontWeight: "700",
-    color: "#222",
-  },
+  page: { width: "100%" },
+  container: { maxWidth: "1200px", margin: "0 auto", padding: "0 1.5rem" },
+  heading: { textAlign: "center", marginBottom: "2rem", fontSize: "2.4rem", fontWeight: "700", color: "#222" },
   search: {
     width: "100%",
     maxWidth: "500px",
@@ -113,11 +115,7 @@ const styles = {
     fontSize: "1rem",
     outline: "none",
   },
-  grid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
-    gap: "2rem",
-  },
+  grid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "2rem" },
   card: {
     background: "#fff",
     padding: "1.6rem",
@@ -128,34 +126,10 @@ const styles = {
     transition: "all 0.25s ease",
     cursor: "pointer",
   },
-  cardHover: {
-    transform: "translateY(-8px)",
-    boxShadow: "0 18px 40px rgba(0,0,0,0.15)",
-  },
-  title: {
-    fontSize: "1.3rem",
-    marginBottom: "0.7rem",
-    color: "#007bff",
-  },
-  content: {
-    flexGrow: 1,
-    color: "#555",
-    lineHeight: "1.6",
-    marginBottom: "1.5rem",
-  },
-  footer: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  meta: {
-    fontSize: "0.85rem",
-    color: "#777",
-  },
-  readMore: {
-    textDecoration: "none",
-    fontWeight: "600",
-    color: "#28a745",
-    fontSize: "0.95rem",
-  },
+  cardHover: { transform: "translateY(-8px)", boxShadow: "0 18px 40px rgba(0,0,0,0.15)" },
+  title: { fontSize: "1.3rem", marginBottom: "0.7rem", color: "#007bff" },
+  content: { flexGrow: 1, color: "#555", lineHeight: "1.6", marginBottom: "1.5rem" },
+  footer: { display: "flex", justifyContent: "space-between", alignItems: "center" },
+  meta: { fontSize: "0.85rem", color: "#777" },
+  readMore: { textDecoration: "none", fontWeight: "600", color: "#28a745", fontSize: "0.95rem" },
 };
